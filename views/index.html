@@ -1,0 +1,111 @@
+<html>
+    <body>
+        <form onsubmit="userDetails(event)" >
+            <label>Choose Price</label>
+            <input type="number" name="price" id="price" required>
+            <label>Choose Dish</label>
+            <input type="text" name="dish" id="dish" required>
+            <label>Choose a Table</label>
+            <select name="tableno" id="tableno">
+                <option value="Table1">Table 1</option>
+                <option value="Table2">Table 2</option>
+                <option value="Table3">Table 3</option>
+            </select>
+            <button>Add To Bill</button>
+        </form>
+        <h2>Orders</h2>
+        <h3>Table 1</h3>
+        <ul id="table1"></ul>
+        <h3>Table 2</h3>
+        <ul id="table2"></ul>
+        <h3>Table 3</h3>
+        <ul id="table3"></ul>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.js"></script>
+        <script>
+            function userDetails(event){
+                event.preventDefault();
+                const price=event.target.price.value;
+                const dish=event.target.dish.value;
+                const tablenum=event.target.tableno.value;
+
+                let obj={
+                    price,
+                    dish,
+                    tablenum
+                }
+                axios.post("http://localhost:3000/add-order",obj).then((response)=>{
+                    showNewUserOnScreen(response.data.newUserDetail)
+                    console.log(response)
+                })
+                .catch((err)=>{
+                    document.body.innerHTML=document.body.innerHTML+"<h4>Something went wrong</h4>"
+                    console.log(err)
+                })                
+            } 
+            window.addEventListener("DOMContentLoaded", () => {
+                    axios.get('http://localhost:3000/get-orders').then((response)=>{
+                        console.log(response)
+                        for(var i=0;i<response.data.allUsers.length;i++){
+                                showNewUserOnScreen(response.data.allUsers[i])
+                            }
+                        }).catch((error)=>{
+                            console.log(error)
+                        })
+                        
+                })            
+                            
+            function showNewUserOnScreen(user){
+                document.getElementById('price').value='';
+                document.getElementById('dish').value='';
+                document.getElementById('tableno').value='';
+            
+                const parentNode1=document.getElementById('table1');
+                const parentNode2=document.getElementById('table2');
+                const parentNode3=document.getElementById('table3');
+  
+                
+                const childHTML=`<li id=${user.id}>${user.price}-${user.dish}-${user.tableno}
+                    <button onclick=deleteUser('${user.id}','${user.tableno}')>Delete Order</button>
+                    </li>`
+                if(user.tableno=='Table1'){
+                    parentNode1.innerHTML=parentNode1.innerHTML+childHTML
+                }    
+                else if(user.tableno=='Table2'){
+                    parentNode2.innerHTML=parentNode2.innerHTML+childHTML
+                }
+                else if(user.tableno=='Table3'){
+                    parentNode3.innerHTML=parentNode3.innerHTML+childHTML
+                }                
+            }
+            function deleteUser(userId,userTable){
+                axios.delete(`http://localhost:3000/delete-order/${userId}`)
+                    .then((response)=> {
+                        // console.log(response);
+                        removeUserFromScreen(userId,userTable)
+                    })
+                    .catch((err)=>{
+                        console.log(err)
+                    })
+            }
+            function removeUserFromScreen(userId,userTable){
+                const parentNode1=document.getElementById('table1');
+                const parentNode2=document.getElementById('table2');
+                const parentNode3=document.getElementById('table3');
+                const childNodeToBeDeleted=document.getElementById(userId);
+                // console.log(childNodeToBeDeleted);
+                if(childNodeToBeDeleted){
+                    if(userTable=='Table1'){
+                        parentNode1.removeChild(childNodeToBeDeleted);
+                }    
+                else if(userTable=='Table2'){
+                        parentNode2.removeChild(childNodeToBeDeleted);
+                }
+                else if(userTable=='Table3'){
+                        parentNode3.removeChild(childNodeToBeDeleted);
+                }                
+    
+                }
+            }
+        </script>
+    </body>
+</html>
