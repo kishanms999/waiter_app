@@ -10,7 +10,7 @@ exports.insertOrder = async (req,res,next)=>{
     const tableno=req.body.tablenum;
 
     const data = await Order.create({price: price, dish:dish, tableno:tableno});
-    res.status(201).json({newUserDetail:data});
+    res.status(201).json({newOrderDetail:data});
     } catch(err){
         res.status(500).json({
             error:err
@@ -20,8 +20,8 @@ exports.insertOrder = async (req,res,next)=>{
 
 exports.getOrders = async (req,res,next)=>{
     try{
-        const users=await Order.findAll();
-        res.status(200).json({allUsers:users});
+        const orders=await Order.findAll();
+        res.status(200).json({allOrders:orders});
     } catch(error){
         console.log('Get user is failing',JSON.stringify(error));
         res.status(500).json({error:error})
@@ -34,8 +34,8 @@ exports.deleteOrder = async (req,res,next)=>{
             console.log('ID is missing');
             return res.status(400).json({err:'ID is missing'})
         }
-        const uId=req.params.id;
-        await Order.destroy({where:{id:uId}});
+        const oId=req.params.id;
+        await Order.destroy({where:{id:oId}});
         res.sendStatus(200);
     } catch(error){
         console.log(err);
